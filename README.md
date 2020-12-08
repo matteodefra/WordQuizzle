@@ -96,3 +96,43 @@ The Client chooses the operations to be done through three GUIs that exchange th
 
 StartForm is the GUI shown at startup, there are two text fields, one for the username and one for the password, and two buttons, one for login and one for registration. In case of login, the *login()* method is called contained in the *ClientManager*, in case of registration, the function *registranuovoutente* of the stub is called, which we will discuss later. If the login was successful, the Client is sent to the *HomeForm*.
 
+#### HomeForm
+
+HomeForm instead, is the GUI that appears after a successfull login or at the end of a challenge. It is the "main home", where the Client can choose which operation to perform. After a certain selection, he can receive specific message with some code and the response received is shown via popup. In the event of a challenge, if it is accepted *SfidaFrame* is launched to manage the challenge.
+
+#### SfidaFrame
+
+SfidaFrame is the GUI shown at the beginning of a challenge, it is made of a line of text containing the word to be translated, a text field to insert the translation and a button to send it. At the end of the challenge, if the Client has to wait for the other opponent then his frame "freezes" waiting for the other. Once the challenge is over, a dialog is shown with the report and the Client is sent back to the HomeFrame.
+
+### Stub RMI
+
+The Stub RMI is made of the *Registration* and *RegistrationImplementation* classes. The two functions loaded on RMI are *register_new_user* and *notificationClient*: the first reads the contents of the *infoserver.json* file in mutual exclusion using the *writeJsonLock* lock and checks that the user is not already registered, if so it adds it; the second, on the other hand, shows the challenged user a dialog where he can accept or reject the challenge, returns 1 in case of accepted challenge, 0 otherwise.
+
+### Further classes and libraries
+
+Google *Gson* package was used as external library, which allows you to read a JSON file and create special classes to convert from string or object. In this particular case the classes used to read the JSON are *InfoServer*, for the *infoserver.json* file, and the *GetJson* class, for the result returned by the *GET* to the *api.mymemory.translated.net* site. For *InfoServer* the fields are the user name, his score, his password and his friends list. For *GetJson*, the fields are *responseData*, an *Info* object that contains the translated word. As for the *ValueOne* and *ValueHashmap* classes, these are used *respectively as the key and value of the hashmap *fighting*, which we have talked about earlier. For *ValueOne* we have:
+* *user*: name of the user who challenges;
+* *sfidaPoint*: counter of user's points in the current challenge;
+* *isInterrupted*: handle the case where the translation of words wasn't successful;
+For *ValueHashmap* instead we have:
+* *user*: the name of the challenged user;
+* *sfidaWords*: the words to be translated;
+* *translated*: the translated words;
+* *pointsSfida*: to take into account the points scored by the challenged user;
+* *hasFinished*: to check if the challenged has finished;
+* *hasFinishedFirst*: to check if the challenger has finished;
+* *hasInterrupted*: to take into account any disconnections of the challenged during a challenge;
+* *hasInterruptedFirst*: to take into account any disconnections of the challenger during a challenge;
+
+### Compilation
+
+As for the compilation and execution, starting from the main directory of the project, we compile Server and Client using:
+```java
+javac -d bin -cp lib/gson-2.8.6.jar:src src/Server/WordQuizzle.java
+javac -d bin -cp lib/gson-2.8.6.jar:src src/Client/NewClient.java
+```
+While for the execution:
+```java
+java -cp bin:lib/gson-2.8.6.jar Server.WordQuizzle
+java -cp bin:lib/gson-2.8.6.jar Client.NewClient
+```
